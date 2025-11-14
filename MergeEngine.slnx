@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/sample/">
+    <Project Path="sample/MergeEngine.Samples/MergeEngine.Samples.csproj" Id="82db8778-3f60-4da4-a64e-fa074e16bcb7" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="readme.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/MergeEngine.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="../MergeEngine.Tests/MergeEngine.Tests.csproj" />
+  </Folder>
+</Solution>

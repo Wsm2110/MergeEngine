@@ -1,10 +1,9 @@
 ﻿using MergeEngine.Core;
-using MergEngine.Contracts;
-using MergEngine.Core;
+using MergeEngine.Contracts;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace MergEngine;
+namespace MergeEngine;
 
 /// <summary>
 /// Responsible for merging two distributed object instances of type <see cref="TObject"/>.

@@ -1,4 +1,4 @@
-﻿using MergEngine.Core;
+﻿using MergeEngine.Core;
 
 namespace MergeEngine.Tests;
 

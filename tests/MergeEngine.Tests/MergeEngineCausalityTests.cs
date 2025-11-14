@@ -1,4 +1,4 @@
-﻿using MergEngine;
+﻿using MergeEngine;
 using MergeEngine.Tests;
 using Xunit;
 

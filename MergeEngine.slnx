@@ -9,6 +9,6 @@
     <Project Path="src/MergeEngine.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="../MergeEngine.Tests/MergeEngine.Tests.csproj" />
+    <Project Path="tests/MergeEngine.Tests/MergeEngine.Tests.csproj" />
   </Folder>
 </Solution>

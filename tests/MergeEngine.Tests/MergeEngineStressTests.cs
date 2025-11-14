@@ -1,5 +1,5 @@
-﻿using MergEngine;
-using MergEngine.Extensions;
+﻿using MergeEngine;
+using MergeEngine.Extensions;
 
 namespace MergeEngine.Tests;
 

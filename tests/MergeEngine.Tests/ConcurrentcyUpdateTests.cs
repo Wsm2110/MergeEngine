@@ -1,6 +1,6 @@
 ﻿using Xunit;
-using MergEngine;
-using MergEngine.Extensions;
+using MergeEngine;
+using MergeEngine.Extensions;
 
 namespace MergeEngine.Tests;
 
@@ -30,7 +30,7 @@ public class ConcurrentUpdateConflictTests
         var result = engine.Merge(a, b);
 
         // Assert behavior
-        Assert.Equal(MergEngine.Core.VectorClockRelation.Concurrent, a.Clock.Compare(b.Clock));     // ensure test condition
+        Assert.Equal(MergeEngine.Core.VectorClockRelation.Concurrent, a.Clock.Compare(b.Clock));     // ensure test condition
         Assert.Equal(20, result.Speed);     // max(10,20) via rule
     }
 }

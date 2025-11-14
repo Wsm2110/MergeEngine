@@ -1,4 +1,4 @@
-﻿namespace MergEngine.Core;
+﻿namespace MergeEngine.Core;
 
 /// <summary>
 /// A vector clock used to track and compare distributed versions of an object.

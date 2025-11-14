@@ -1,6 +1,6 @@
 ﻿using MergeEngine.Core;
-using MergEngine.Contracts;
-using MergEngine.Core;
+using MergeEngine.Contracts;
+using MergeEngine.Core;
 
 namespace MergeEngine.Samples;
 public sealed class VehicleState : IMergeObject

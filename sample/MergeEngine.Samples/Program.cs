@@ -1,6 +1,6 @@
-﻿using MergEngine;
-using MergEngine.Core;
-using MergEngine.Extensions;
+﻿using MergeEngine;
+using MergeEngine.Core;
+using MergeEngine.Extensions;
 using MergeEngine.Samples;
 
 namespace VehicleMergeExample

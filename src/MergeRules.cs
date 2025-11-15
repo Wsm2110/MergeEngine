@@ -1,8 +1,5 @@
 ﻿using MergeEngine.Contracts;
 using MergeEngine.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace MergeEngine;
 
@@ -77,7 +74,6 @@ public static class MergeRules
     public static IMergeRule<bool> AndBoolean() =>
         new AndBooleanRule();
 
-
     /// <summary>
     /// CRDT-style union merge for sets.
     /// Always preserves all unique elements from both replicas.
@@ -87,7 +83,6 @@ public static class MergeRules
     public static IMergeRule<HashSet<T>> SetUnion<T>() =>
         new SetUnionRule<T>();
 
-
     /// <summary>
     /// A merge rule for distributed counters that sums integer values **only for concurrent merges**.
     ///
@@ -95,7 +90,6 @@ public static class MergeRules
     /// </summary>
     public static IMergeRule<int> SumInt() =>
         new SumIntRule();
-
 
     /// <summary>
     /// Chooses the maximum integer value.
@@ -110,13 +104,11 @@ public static class MergeRules
     public static IMergeRule<int> MaxInt() =>
         new MaxIntRule();
 
-
     /// <summary>
     /// Chooses the minimum integer value.
     /// </summary>
     public static IMergeRule<int> MinInt() =>
         new MinIntRule();
-
 
     /// <summary>
     /// Selects the maximum of two double values.
@@ -124,13 +116,11 @@ public static class MergeRules
     public static IMergeRule<double> MaxDouble() =>
         new MaxDoubleRule();
 
-
     /// <summary>
     /// Selects the minimum of two double values.
     /// </summary>
     public static IMergeRule<double> MinDouble() =>
         new MinDoubleRule();
-
 
     /// <summary>
     /// Averages two double values.
@@ -140,7 +130,6 @@ public static class MergeRules
     public static IMergeRule<double> AverageDouble() =>
         new AverageDoubleRule();
 
-
     /// <summary>
     /// Blends two double values using a linear interpolation factor (weight).
     ///
@@ -149,14 +138,12 @@ public static class MergeRules
     public static IMergeRule<double> BlendDouble(double weight = 0.5) =>
         new BlendDoubleRule(weight);
 
-
     /// <summary>
     /// Chooses the string with the greatest length.
     /// Useful for merging descriptions or messages where longer = more complete.
     /// </summary>
     public static IMergeRule<string> LongestString() =>
         new LongestStringRule();
-
 
     /// <summary>
     /// Chooses the shortest string.
@@ -173,7 +160,6 @@ public static class MergeRules
     public static IMergeRule<List<T>> AppendList<T>() =>
         new AppendListRule<T>();
 
-
     /// <summary>
     /// Appends all unique elements from both lists.
     /// Behaves like a list-based CRDT grow-only set.
@@ -181,14 +167,12 @@ public static class MergeRules
     public static IMergeRule<List<T>> UniqueAppend<T>() =>
         new UniqueAppendRule<T>();
 
-
     /// <summary>
     /// Merges two dictionaries.  
     /// If a key exists on both sides, its value is merged via the specified value-rule.
     /// </summary>
     public static IMergeRule<Dictionary<TKey, TValue>> DictionaryMerge<TKey, TValue>(IMergeRule<TValue> valueRule) =>
         new DictionaryMergeRule<TKey, TValue>(valueRule);
-
 
     /// <summary>
     /// Timestamp-based merge rule.
@@ -199,7 +183,6 @@ public static class MergeRules
     public static IMergeRule<(T Value, DateTime Timestamp)> Timestamped<T>() =>
         new TimestampedRule<T>();
 
-
     /// <summary>
     /// Uses priority values to determine the winning side.
     /// Higher priority always wins.
@@ -207,14 +190,12 @@ public static class MergeRules
     public static IMergeRule<(T Value, int Priority)> Priority<T>() =>
         new PriorityRule<T>();
 
-
     /// <summary>
     /// Always selects the local value.
     /// Useful for node-locked configuration or when this node is authoritative.
     /// </summary>
     public static IMergeRule<T> PreferLocal<T>() =>
         new PreferLocalRule<T>();
-
 
     /// <summary>
     /// Always selects the remote value.
@@ -242,7 +223,6 @@ public static class MergeRules
     public static IMergeRule<T> MostUpdatesWins<T>() =>
         new MostUpdatesWinsRule<T>();
 
-
     /// <summary>
     /// The replica whose single node contributed the most updates wins.
     ///
@@ -255,7 +235,6 @@ public static class MergeRules
     /// </summary>
     public static IMergeRule<T> HighestNodeContributionWins<T>() =>
         new HighestNodeContributionWinsRule<T>();
-
 
     /// <summary>
     /// Trust-based rule, where each node has a predefined weight or reputation.
@@ -271,7 +250,6 @@ public static class MergeRules
     public static IMergeRule<T> TrustWeighted<T>(Dictionary<string, int> trust) =>
         new TrustWeightedRule<T>(trust);
 
-
     /// <summary>
     /// Randomly picks local or remote on conflict.
     ///
@@ -280,7 +258,6 @@ public static class MergeRules
     /// </summary>
     public static IMergeRule<T> RandomChoice<T>() =>
         new RandomChoiceRule<T>();
-
 
     /// <summary>
     /// Majority-vote rule — the side with more vector-clock entries wins.
@@ -294,18 +271,12 @@ public static class MergeRules
     public static IMergeRule<T> MajorityVote<T>() =>
         new MajorityVoteRule<T>();
 
-
     /// <summary>
     /// Lexicographic rule: the side whose smallest node-id is alphabetically earlier wins.
     /// This gives a deterministic conflict resolver independent of timing.
     /// </summary>
     public static IMergeRule<T> LexicographicNodeWins<T>() =>
         new LexicographicNodeWinsRule<T>();
-
-
-    // =====================================================================
-    // IMPLEMENTATIONS
-    // =====================================================================
 
     private sealed class VectorClockLwwRule<T> : IMergeRule<T>
     {

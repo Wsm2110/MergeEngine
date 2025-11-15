@@ -76,7 +76,9 @@ public sealed class PropertyAccessor<TObject, TProp> : PropertyAccessorBase<TObj
                 break;
 
             case VectorClockRelation.Equal:
-                resolved = remoteValue;   // deterministic choice
+                // Note. means both replicas have seen exactly the same history of updates.
+                // Therefore the objects are guaranteed to be in sync, so resolving is a deterministic no-op.
+                resolved = remoteValue; 
                 break;
 
             case VectorClockRelation.Concurrent:

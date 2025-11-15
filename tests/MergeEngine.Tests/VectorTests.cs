@@ -2,7 +2,7 @@
 
 namespace MergeEngine.Tests;
 
-public class VectorClockMathTests
+public class VectorClockTests
 {
     [Fact]
     public void Reflexivity_Clock_Equals_Itself()
@@ -123,4 +123,124 @@ public class VectorClockMathTests
 
         Assert.True(after > before);
     }
+
+    [Fact]
+    public void EqualClocks_Are_Equal()
+    {
+        var a = new UnitState();
+        var b = new UnitState();
+
+        a.Clock.Increment("A");  // [A:1]
+        b.Clock.Increment("A");  // [A:1]
+
+        Assert.Equal(VectorClockRelation.Equal, a.Clock.Compare(b.Clock));
+    }
+
+    [Fact]
+    public void Merging_EqualClocks_Produces_IdenticalClock()
+    {
+        var a = new UnitState { Callsign = "Alpha" };
+        var b = new UnitState { Callsign = "Alpha" };
+
+        a.Clock.Increment("A");  // [A:1]
+        b.Clock.Increment("A");  // [A:1]
+
+        var engine = new MergeEngine<UnitState>();
+        var merged = engine.Merge(a, b);
+
+        Assert.Equal("Alpha", merged.Callsign);
+        Assert.Equal(1, merged.Clock.Versions["A"]);
+        Assert.Single(merged.Clock.Versions);
+    }
+
+    [Fact]
+    public void EqualClocks_DoNotIntroduceNewClockEntries()
+    {
+        var a = new UnitState();
+        var b = new UnitState();
+
+        a.Clock.Increment("A");
+        b.Clock.Increment("A");
+
+        var engine = new MergeEngine<UnitState>();
+        var merged = engine.Merge(a, b);
+
+        Assert.False(merged.Clock.Versions.ContainsKey("B")); // no phantom nodes
+    }
+
+    [Fact]
+    public void EqualClocks_Are_Idempotent_WhenMergedMultipleTimes()
+    {
+        var a = new UnitState();
+        a.Clock.Increment("A");
+
+        var engine = new MergeEngine<UnitState>();
+        var merged1 = engine.Merge(a, a);
+        var merged2 = engine.Merge(merged1, a);
+
+        Assert.Equal(VectorClockRelation.Equal, merged1.Clock.Compare(merged2.Clock));
+    }
+
+    [Fact]
+    public void EqualClockResolution_DeterministicallyChoosesRemoteValue()
+    {
+        var local = new UnitState { Callsign = "Local" };
+        var remote = new UnitState { Callsign = "Remote" };
+
+        local.Clock.Increment("A");     // [A:1]
+        remote.Clock.Increment("A");    // [A:1]
+
+        var engine = new MergeEngine<UnitState>();
+        var result = engine.Merge(local, remote);
+
+        // Deterministic branch: Equal → remote chosen.
+        Assert.Equal("Remote", result.Callsign);
+    }
+
+    [Fact]
+    public void EqualClocks_MergeAgain_BiDirectional_ProducesIdenticalObjects()
+    {
+        var a = new UnitState { Callsign = "Alpha", Speed = 10, IsArmed = true };
+        var b = new UnitState { Callsign = "Alpha", Speed = 10, IsArmed = true };
+
+        // Both have identical causal history
+        a.Clock.Increment("A");   // [A:1]
+        b.Clock.Increment("A");   // [A:1]
+
+        var engine = new MergeEngine<UnitState>();
+
+        // First merge results in a fully converged object
+        var merged1 = engine.Merge(a, b);
+
+        // Merge again from both directions
+        var mergedFromOriginal = engine.Merge(merged1, a);
+        var mergedReverse = engine.Merge(merged1, b);
+
+        // All resulting objects should be logically identical
+        Assert.Equal(mergedFromOriginal.Callsign, mergedReverse.Callsign);
+        Assert.Equal(mergedFromOriginal.Speed, mergedReverse.Speed);
+        Assert.Equal(mergedFromOriginal.IsArmed, mergedReverse.IsArmed);
+        Assert.Equal(mergedFromOriginal.BlueForces, mergedReverse.BlueForces);
+
+        // Vector clock must remain equal and unchanged
+        Assert.Equal(VectorClockRelation.Equal, mergedFromOriginal.Clock.Compare(mergedReverse.Clock));
+        Assert.Equal(merged1.Clock.Versions, mergedFromOriginal.Clock.Versions);
+        Assert.Equal(merged1.Clock.Versions, mergedReverse.Clock.Versions);
+    }
+
+    [Fact]
+    public void EqualClocks_Imply_EqualState()
+    {
+        var a = new UnitState { Callsign = "Alpha", Speed = 10, IsArmed = false };
+        var b = new UnitState { Callsign = "Alpha", Speed = 10, IsArmed = false };
+
+        a.Clock.Increment("A");
+        b.Clock.Increment("A");
+
+        Assert.Equal(VectorClockRelation.Equal, a.Clock.Compare(b.Clock));
+        Assert.Equal(a.Callsign, b.Callsign);
+        Assert.Equal(a.Speed, b.Speed);
+        Assert.Equal(a.IsArmed, b.IsArmed);
+    }
+
 }

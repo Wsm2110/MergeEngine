@@ -1,81 +1,47 @@
-﻿
-# MergeEngine – Deterministic Distributed Object Merging with Vector Clocks
+﻿# MergeEngine – Deterministic Distributed Object Merging with Vector Clocks
 
-MergeEngine is a lightweight C# library for **merging distributed object state safely and deterministically**, without relying on unreliable timestamp-based Last-Write-Wins. It uses **Vector Clocks** to detect whether updates are causally ordered or occurred concurrently, and applies **custom merge rules only when necessary**.
+MergeEngine is a lightweight C# library for **merging distributed object state deterministically** using **Vector Clocks** and **per-property conflict resolution rules**.
 
-## 🚀 Why Vector Clocks Instead of Last-Write-Wins?
-Traditional LWW systems based on timestamps (`UpdatedAt`) are unreliable because:
+It is designed for multi-node, multi-master, eventually consistent systems where objects are updated concurrently across replicas.
 
-- Machines do not share perfectly synchronized clocks (clock skew)
-- Network delays and message reordering change event timing
-- Two replicas may update without knowing about each other (true concurrency)
+## Why MergeEngine?
 
-### Vector clocks fix this by tracking **causal history**, giving four clear relationships:
+Typical LWW (Last-Write-Wins) systems based on timestamps fail because clocks drift and messages reorder. Vector clocks solve this by tracking causal history across nodes.
 
-| Relation | Meaning | Automatic Resolution |
-|---------|---------|----------------------|
-| **Before** | Remote update happened after local | Remote overrides local |
-| **After** | Local update happened after remote | Local overrides remote |
-| **Equal** | Identical history | Deterministic overwrite using remote |
-| **Concurrent** | Both changed independently | **Custom merge rule invoked** |
+## Core Features
+- Per-property CRDT-style merge rules
+- Vector clock causality detection
+- Attribute-based merge rule injection
+- Resolver module support
+- In-place or immutable merge operations
 
-💡 **Custom merge rules are only applied on CONCURRENT updates.**  
-Causally ordered updates require no conflict resolution.
-
-## 🧠 Custom Merge Rules
-Merge rules enable domain-specific conflict resolution:
-
+## Attribute Example
 ```csharp
-engine.SetRule(v => v.ActiveSensors, MergeRules.SetUnion<string>());
-engine.SetRule(v => v.EngineOn, MergeRules.OrBoolean());
-engine.SetRule(v => v.Speed, MergeRules.MaxDouble());
+public class VehicleState : IMergeObject
+{
+    public VectorClock Clock { get; set; } = new();
+
+    [MergeRule(typeof(SetUnionRule<string>))]
+    public HashSet<string> ActiveSensors { get; set; }
+
+    [MergeRule(typeof(OrBooleanRule))]
+    public bool EngineOn { get; set; }
+
+    public double Speed { get; set; }
+}
 ```
 
-| Rule | Example | Behavior |
-|------|--------|-----------|
-| `LastWriteWins<T>` | default behavior | Uses vector clock ordering first |
-| `SetUnion<T>` | sensor lists, groups | Combines both sets when concurrent |
-| `OrBoolean` | flags like `EngineOn` | `true` dominates |
-| `MaxDouble` | measurements like `Speed` | Highest number wins |
-
-## 🧪 Example
+## Resolver Example
 ```csharp
-var engine = new MergeEngine<VehicleState>();
+public class VehicleMergeResolver : IMergeResolver
+{
+    public void RegisterRules<T>(MergeEngine<T> engine)
+        where T : IMergeObject, new()
+    {
+        if (typeof(T) != typeof(VehicleState))
+            return;
 
-engine.SetRule(v => v.ActiveSensors, MergeRules.SetUnion<string>());
-engine.SetRule(v => v.EngineOn, MergeRules.OrBoolean());
-
-var local = new VehicleState { EngineOn = false, ActiveSensors = new HashSet<string> { "GPS" }, Speed = 40 };
-var remote = new VehicleState { EngineOn = true, ActiveSensors = new HashSet<string> { "LIDAR" }, Speed = 50 };
-
-local.Update(v => v.ActiveSensors.Add("GPS"), "Node-A");
-remote.Update(v => v.ActiveSensors.Add("LIDAR"), "Node-B");
-
-var merged = engine.Merge(local, remote);
+        engine.SetRule(v => ((VehicleState)(object)v).Speed, MergeRules.MaxDouble());
+    }
+}
 ```
-
-### In this example
-- Updates came from independent nodes → **Concurrent**
-- The rules determine:
-  - Sensors = `["GPS", "LIDAR"]`
-  - EngineOn = `true`
-  - Speed = chosen according to rule or LWW
-
-## 📌 Key Features
-
-| Feature | Description |
-|---------|-------------|
-| **Per-property merge** | Intelligent merging instead of overwriting whole object |
-| **Custom rules** | Only triggered during concurrent conflicts |
-| **Vector Clock causality** | Accurate update ordering without timestamps |
-| **Pure functional merge** | `Merge()` returns a new object |
-| **Optional in-place merge** | `MergeInto()` updates existing instance for speed |
-| **CRDT-friendly** | Ideal for eventually consistent distributed replicas |
-
-## 💡 Why not rely only on Last-Write-Wins?
-LWW overwrites data even when both updates matter.  
-Example: two vehicles independently reporting different sensors — with timestamp LWW, **one dataset is destroyed**.  
-With MergeEngine CRDT rules → **sensors combine safely**.
-
-## 📝 License
-MIT

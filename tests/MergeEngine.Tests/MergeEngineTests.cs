@@ -1,6 +1,7 @@
 ﻿using MergeEngine;
 using MergeEngine.Core;
 using MergeEngine.Extensions;
+using MergeEngine.Tests.Models;
 
 namespace MergeEngine.Tests;
 

@@ -1,4 +1,5 @@
 ﻿using MergeEngine.Core;
+using MergeEngine.Tests.Models;
 
 namespace MergeEngine.Tests;
 
@@ -242,5 +243,4 @@ public class VectorClockTests
         Assert.Equal(a.Speed, b.Speed);
         Assert.Equal(a.IsArmed, b.IsArmed);
     }
-
 }

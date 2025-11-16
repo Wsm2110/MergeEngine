@@ -1,6 +1,7 @@
 ﻿using Xunit;
 using MergeEngine;
 using MergeEngine.Extensions;
+using MergeEngine.Tests.Models;
 
 namespace MergeEngine.Tests;
 

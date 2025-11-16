@@ -35,8 +35,8 @@ namespace MergeEngine;
 /// </typeparam>
 public class MergeEngine<TObject> where TObject : IMergeObject, new()
 {
-    private readonly List<PropertyAccessorBase<TObject>> _properties;
-    private readonly Dictionary<string, PropertyAccessorBase<TObject>> _propertiesByName;
+    private readonly List<IPropertyAccessorBase<TObject>> _properties;
+    private readonly Dictionary<string, IPropertyAccessorBase<TObject>> _propertiesByName;
     private List<PropertyInfo> _ignoredProperties = new List<PropertyInfo>();
 
     /// <summary>
@@ -50,10 +50,21 @@ public class MergeEngine<TObject> where TObject : IMergeObject, new()
     /// expression trees instead of reflection, enabling high-performance merging suitable
     /// for real-time distributed update pipelines.
     /// </summary>
-    public MergeEngine()
+    private readonly IMergeResolver<TObject>? _resolver;
+
+    /// <summary>
+    /// Constructs a merge engine with an optional merge resolver which can
+    /// inject rules for properties.
+    /// </summary>
+    public MergeEngine(IMergeResolver<TObject>? resolver = null)
     {
+        _resolver = resolver;
+
         _properties = BuildPropertyAccessors();
         _propertiesByName = _properties.ToDictionary(p => p.Name, p => p);
+
+        // Let resolver register custom rules AFTER accessors have been built
+        _resolver?.RegisterRules(this);
     }
 
     /// <summary>
@@ -173,7 +184,7 @@ public class MergeEngine<TObject> where TObject : IMergeObject, new()
         return merged;
     }
 
-    private List<PropertyAccessorBase<TObject>> BuildPropertyAccessors()
+    private List<IPropertyAccessorBase<TObject>> BuildPropertyAccessors()
     {
         var properties = typeof(TObject)
             .GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -183,21 +194,31 @@ public class MergeEngine<TObject> where TObject : IMergeObject, new()
             .ToList();
 
         var mergeable = properties
-            .Where(p =>
-                p.CanRead &&
-                p.CanWrite &&
-                p.Name != nameof(IMergeObject.Clock) &&
-                !_ignoredProperties.Contains(p))
-            .ToArray();
+    .Where(p =>
+        p.CanRead &&
+        p.CanWrite &&
+        p.Name != nameof(IMergeObject.Clock) &&
+        !_ignoredProperties.Contains(p))
+    .ToArray();
 
-        var list = new List<PropertyAccessorBase<TObject>>(mergeable.Length);
+        var list = new List<IPropertyAccessorBase<TObject>>(mergeable.Length);
 
         foreach (var prop in mergeable)
         {
             var accessorType = typeof(PropertyAccessor<,>)
                 .MakeGenericType(typeof(TObject), prop.PropertyType);
 
-            list.Add((PropertyAccessorBase<TObject>)Activator.CreateInstance(accessorType, prop)!);
+            var accessor = (IPropertyAccessorBase<TObject>)Activator.CreateInstance(accessorType, prop);
+            accessor?.Name = prop.Name;            // Apply rule from attribute if present
+
+            var attr = prop.GetCustomAttribute<MergeRuleAttribute>();
+            if (attr != null)
+            {
+                var rule = Activator.CreateInstance(attr.RuleType);
+                accessor?.SetRuleInstance(rule!);
+            }
+
+            list.Add(accessor!);
         }
 
         return list;

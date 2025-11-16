@@ -2,7 +2,7 @@
 using MergeEngine.Contracts;
 using MergeEngine.Core;
 
-namespace MergeEngine.Tests;
+namespace MergeEngine.Tests.Models;
 
 /// <summary>
 /// Example mergeable entity for a distributed system (e.g. blue force tracking).

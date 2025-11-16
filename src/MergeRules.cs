@@ -278,7 +278,7 @@ public static class MergeRules
     public static IMergeRule<T> LexicographicNodeWins<T>() =>
         new LexicographicNodeWinsRule<T>();
 
-    private sealed class VectorClockLwwRule<T> : IMergeRule<T>
+    public sealed class VectorClockLwwRule<T> : IMergeRule<T>
     {
         public T Merge(T local, T remote, VectorClock lc, VectorClock rc)
         {
@@ -295,19 +295,19 @@ public static class MergeRules
         }
     }
 
-    private sealed class OrBooleanRule : IMergeRule<bool>
+    public sealed class OrBooleanRule : IMergeRule<bool>
     {
         public bool Merge(bool local, bool remote, VectorClock lc, VectorClock rc) =>
             local || remote;
     }
 
-    private sealed class AndBooleanRule : IMergeRule<bool>
+    public sealed class AndBooleanRule : IMergeRule<bool>
     {
         public bool Merge(bool local, bool remote, VectorClock lc, VectorClock rc) =>
             local && remote;
     }
 
-    private sealed class SetUnionRule<T> : IMergeRule<HashSet<T>>
+    public sealed class SetUnionRule<T> : IMergeRule<HashSet<T>>
     {
         public HashSet<T> Merge(HashSet<T> local, HashSet<T> remote, VectorClock lc, VectorClock rc)
         {
@@ -318,13 +318,13 @@ public static class MergeRules
         }
     }
 
-    private sealed class SumIntRule : IMergeRule<int>
+    public sealed class SumIntRule : IMergeRule<int>
     {
         public int Merge(int local, int remote, VectorClock lc, VectorClock rc) =>
             local + remote;
     }
 
-    private sealed class MaxIntRule : IMergeRule<int>
+    public sealed class MaxIntRule : IMergeRule<int>
     {
         public int Merge(int local, int remote, VectorClock lc, VectorClock rc) =>
             Math.Max(local, remote);
@@ -336,25 +336,25 @@ public static class MergeRules
             Math.Min(local, remote);
     }
 
-    private sealed class MaxDoubleRule : IMergeRule<double>
+    public sealed class MaxDoubleRule : IMergeRule<double>
     {
         public double Merge(double local, double remote, VectorClock lc, VectorClock rc) =>
             Math.Max(local, remote);
     }
 
-    private sealed class MinDoubleRule : IMergeRule<double>
+    public sealed class MinDoubleRule : IMergeRule<double>
     {
         public double Merge(double local, double remote, VectorClock lc, VectorClock rc) =>
             Math.Min(local, remote);
     }
 
-    private sealed class AverageDoubleRule : IMergeRule<double>
+    public sealed class AverageDoubleRule : IMergeRule<double>
     {
         public double Merge(double local, double remote, VectorClock lc, VectorClock rc) =>
             (local + remote) / 2.0;
     }
 
-    private sealed class BlendDoubleRule : IMergeRule<double>
+    public sealed class BlendDoubleRule : IMergeRule<double>
     {
         private readonly double _weight;
 
@@ -365,13 +365,13 @@ public static class MergeRules
             local * (1 - _weight) + remote * _weight;
     }
 
-    private sealed class LongestStringRule : IMergeRule<string>
+    public sealed class LongestStringRule : IMergeRule<string>
     {
         public string Merge(string local, string remote, VectorClock lc, VectorClock rc) =>
             (local?.Length ?? 0) >= (remote?.Length ?? 0) ? local : remote;
     }
 
-    private sealed class ShortestStringRule : IMergeRule<string>
+    public sealed class ShortestStringRule : IMergeRule<string>
     {
         public string Merge(string local, string remote, VectorClock lc, VectorClock rc) =>
             (local?.Length ?? int.MaxValue) <= (remote?.Length ?? int.MaxValue) ? local : remote;
@@ -388,7 +388,7 @@ public static class MergeRules
         }
     }
 
-    private sealed class UniqueAppendRule<T> : IMergeRule<List<T>>
+    public sealed class UniqueAppendRule<T> : IMergeRule<List<T>>
     {
         public List<T> Merge(List<T> local, List<T> remote, VectorClock lc, VectorClock rc)
         {
@@ -403,7 +403,7 @@ public static class MergeRules
         }
     }
 
-    private sealed class DictionaryMergeRule<TKey, TValue> :
+    public sealed class DictionaryMergeRule<TKey, TValue> :
         IMergeRule<Dictionary<TKey, TValue>>
     {
         private readonly IMergeRule<TValue> _valueRule;
@@ -433,7 +433,7 @@ public static class MergeRules
         }
     }
 
-    private sealed class TimestampedRule<T> :
+    public sealed class TimestampedRule<T> :
         IMergeRule<(T Value, DateTime Timestamp)>
     {
         public (T Value, DateTime Timestamp) Merge(
@@ -445,7 +445,7 @@ public static class MergeRules
         }
     }
 
-    private sealed class PriorityRule<T> : IMergeRule<(T Value, int Priority)>
+    public sealed class PriorityRule<T> : IMergeRule<(T Value, int Priority)>
     {
         public (T Value, int Priority) Merge(
             (T Value, int Priority) local,
@@ -456,17 +456,17 @@ public static class MergeRules
         }
     }
 
-    private sealed class PreferLocalRule<T> : IMergeRule<T>
+    public sealed class PreferLocalRule<T> : IMergeRule<T>
     {
         public T Merge(T local, T remote, VectorClock lc, VectorClock rc) => local;
     }
 
-    private sealed class PreferRemoteRule<T> : IMergeRule<T>
+    public sealed class PreferRemoteRule<T> : IMergeRule<T>
     {
         public T Merge(T local, T remote, VectorClock lc, VectorClock rc) => remote;
     }
 
-    private sealed class NodeAlwaysWinsRule<T> : IMergeRule<T>
+    public sealed class NodeAlwaysWinsRule<T> : IMergeRule<T>
     {
         private readonly string _superNode;
 
@@ -484,7 +484,7 @@ public static class MergeRules
         }
     }
 
-    private sealed class MostUpdatesWinsRule<T> : IMergeRule<T>
+    public sealed class MostUpdatesWinsRule<T> : IMergeRule<T>
     {
         public T Merge(T local, T remote, VectorClock lc, VectorClock rc)
         {
@@ -495,7 +495,7 @@ public static class MergeRules
         }
     }
 
-    private sealed class HighestNodeContributionWinsRule<T> : IMergeRule<T>
+    public sealed class HighestNodeContributionWinsRule<T> : IMergeRule<T>
     {
         public T Merge(T local, T remote, VectorClock lc, VectorClock rc)
         {
@@ -506,7 +506,7 @@ public static class MergeRules
         }
     }
 
-    private sealed class TrustWeightedRule<T> : IMergeRule<T>
+    public sealed class TrustWeightedRule<T> : IMergeRule<T>
     {
         private readonly Dictionary<string, int> _trust;
 
@@ -524,7 +524,7 @@ public static class MergeRules
         }
     }
 
-    private sealed class RandomChoiceRule<T> : IMergeRule<T>
+    public sealed class RandomChoiceRule<T> : IMergeRule<T>
     {
         private static readonly Random Rng = new();
 
@@ -532,7 +532,7 @@ public static class MergeRules
             => Rng.NextDouble() < 0.5 ? local : remote;
     }
 
-    private sealed class MajorityVoteRule<T> : IMergeRule<T>
+    public sealed class MajorityVoteRule<T> : IMergeRule<T>
     {
         public T Merge(T local, T remote, VectorClock lc, VectorClock rc)
         {
@@ -546,7 +546,7 @@ public static class MergeRules
         }
     }
 
-    private sealed class LexicographicNodeWinsRule<T> : IMergeRule<T>
+    public sealed class LexicographicNodeWinsRule<T> : IMergeRule<T>
     {
         public T Merge(T local, T remote, VectorClock lc, VectorClock rc)
         {
